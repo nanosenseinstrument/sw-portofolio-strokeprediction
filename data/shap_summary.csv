@@ -1,0 +1,11 @@
+col_name,feature_importance_vals
+age,2.3685825
+avg_glucose_level,0.6144645
+bmi,0.60043436
+Residence_type,0.39772514
+ever_married,0.37964216
+work_type,0.2655073
+gender,0.2128547
+smoking_status,0.20832102
+heart_disease,0.11424787
+hypertension,0.09703289
