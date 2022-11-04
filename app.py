@@ -152,6 +152,12 @@ with st.sidebar:
 if "inputs" not in st.session_state:
     st.session_state.inputs = [1, 0, 0, 0, 0, 2, 0, 50, 20.0, 2]
 
+if "prediction" not in st.session_state:
+    st.session_state.prediction = 0
+
+if "proba" not in st.session_state:
+    st.session_state.proba = 0.3
+
 
 # selected = option_menu(
 #     None,
@@ -180,13 +186,18 @@ if selected == "Home":
 
 
 if selected == "Stroke Prediction":
+    st.header("Input Variable:")
 
-    with st.sidebar:
-        st.header("Input Variable:")
+    main1, main2, main3 = st.columns(3)
+
+    with main1:
+
         age = st.number_input("Age", step=1)
         glucose = st.number_input("Glucose level", step=1, min_value=50)
         weight = st.number_input("Weight (Kg)", step=1, min_value=20)
         height = st.number_input("Height (cm)", step=1, min_value=100)
+
+    with main2:
         smoking = st.selectbox(
             "Smoking Status", ("Smokes", "Formely smoked", "Never smoked", "Unknown")
         )
@@ -196,6 +207,7 @@ if selected == "Stroke Prediction":
             "Work Type",
             ("Goverment Job", "Self-employed", "Private", "Never Worked", "Children"),
         )
+    with main3:
         Residence_type = st.selectbox("Residence Type", ("Rural", "Urban"))
         ever_married = st.selectbox("Martial Status", ("No", "Yes"))
         heart_history = st.selectbox("Heart Disease", ("No History", "History"))
@@ -226,28 +238,25 @@ if selected == "Stroke Prediction":
             if smoking == "Never smoked"
             else -1,
         ]
-        print(inputs)
-        st.session_state.inputs = inputs
 
-    prediction = model.predict(inputs)
-    proba = model.predict_proba(inputs)
+    st.session_state.inputs = inputs
+    st.session_state.prediction = model.predict(inputs)
+    st.session_state.proba = model.predict_proba(inputs)
 
     # sidebar
-    st.markdown(
-        "<h1 style='text-align: center; color: black;'>Stroke Prediction and Confidence</h1>",
-        unsafe_allow_html=True,
-    )
+    # with main2:
+    st.header(" ")
 
-    if prediction == 1:
+    if st.session_state.prediction == 1:
         html_temp = """
             <div style="background-color:{};padding:10px;border-radius:10px 10px 10px 10px">
-            <h2 style="color:{};text-align:center;">High Stroke Risk</h2>
+            <h3 style="color:{};text-align:center;">High Stroke Risk</h3>
             </div>
             """
 
         bg_results = ["#F1E1E6", "#7D363B"]
 
-        persen_proba = float(round((proba - 0.3) / 0.7, 2))
+        persen_proba = float(round((st.session_state.proba - 0.3) / 0.7, 2))
 
         liquidfill_option = {
             "series": [{"type": "liquidFill", "data": [persen_proba], "color": [colors[0]]}]
@@ -263,20 +272,24 @@ if selected == "Stroke Prediction":
 
         bg_results = ["#D3E0EA", "#276678"]
 
-        persen_proba = float(round((0.3 - proba) / 0.3, 2))
+        persen_proba = float(round((0.3 - st.session_state.proba) / 0.3, 2))
 
         liquidfill_option = {
             "series": [{"type": "liquidFill", "data": [persen_proba], "color": [colors[1]]}]
         }
 
-    st.markdown(html_temp.format(bg_results[0], bg_results[1]), unsafe_allow_html=True)
+    col1, col2 = st.columns((7, 3))
+    with col1:
+        st.header("Stroke Prediction and Confidence:")
+        st.markdown(html_temp.format(bg_results[0], bg_results[1]), unsafe_allow_html=True)
 
-    input_shap = np.asarray(inputs).reshape(1, -1)
-    input_shap = pd.DataFrame(input_shap, columns=colname)
-    shap_values = explainer.shap_values(input_shap)
-    st_shap(shap.force_plot(explainer.expected_value, shap_values[0, :], input_shap))
+        input_shap = np.asarray(inputs).reshape(1, -1)
+        input_shap = pd.DataFrame(input_shap, columns=colname)
+        shap_values = explainer.shap_values(input_shap)
+        st_shap(shap.force_plot(explainer.expected_value, shap_values[0, :], input_shap))
 
-    st_echarts(liquidfill_option)
+    with col2:
+        st_echarts(liquidfill_option)
 
     # input variables
     # st.subheader("Input Varibles")
@@ -784,8 +797,8 @@ text-decoration: underline;
 position: fixed;
 left: 0;
 bottom: 0;
-width: 100%;
-background-color: white;
+width: 300px;
+background-color: transparent;
 color: black;
 text-align: center;
 }
@@ -794,4 +807,4 @@ text-align: center;
 <p><b>Stroke Dashboard V1</b><br>© 2022 Data Science Division<a style='display: block; text-align: center;' href="https://www.nanosense-id.com/" target="_blank">PT Nanosense Instrument Indonesia</a></p>
 </div>
 """
-st.markdown(footer, unsafe_allow_html=True)
+st.sidebar.markdown(footer, unsafe_allow_html=True)
