@@ -1,0 +1,10 @@
+joblib==1.2.0
+numpy==1.23.4
+pandas==1.5.1
+plotly==5.3.0
+shap==0.41.0
+streamlit==1.14.0
+streamlit_echarts==0.4.0
+streamlit_option_menu==0.3.2
+streamlit_shap==1.0.2
+xgboost==1.7.1
